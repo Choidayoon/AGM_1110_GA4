@@ -5,14 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AGM마켓 | 신선식품 전문 온라인몰</title>
 
-  <!-- Google Tag Manager -->
-  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-K2QVPVFG');</script>
-  <!-- End Google Tag Manager -->
-
   <!-- Google tag (gtag.js) - GA4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-F86695PV7N"></script>
   <script>
@@ -438,10 +430,6 @@
   </style>
 </head>
 <body>
-<!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-K2QVPVFG"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
 
 <!-- ══ HEADER ══ -->
 <header id="site-header">
@@ -1401,7 +1389,19 @@ function showPage(name) {
 
 function goHome()      { navigate('/'); }
 function openCart()    { navigate('/cart'); }
-function openWishlist(){ navigate('/wishlist'); }
+function openWishlist(){
+  // [GA4 택소노미 #6] go_to_wishlist — 헤더 하트(찜 목록) 버튼 클릭
+  // 이동 전에 호출해야 page_type이 클릭한 화면 기준으로 잡힌다
+  const PAGE_TYPE_MAP = { 'product': 'product_detail', 'order-complete': 'order_complete' };
+  const rawType = document.body.getAttribute('data-page-type') || 'home';
+  trackEvent('go_to_wishlist', {
+    click_location: 'header',
+    page_type: PAGE_TYPE_MAP[rawType] || rawType,
+    wishlist_count: wishlist.length,
+    login_status: currentUser ? 'logged_in' : 'logged_out'
+  });
+  navigate('/wishlist');
+}
 
 // ────────────────────────────────
 // PRODUCT GRID
