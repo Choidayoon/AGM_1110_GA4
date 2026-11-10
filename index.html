@@ -11,7 +11,9 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-F86695PV7N');
+    // 주소 끝에 ?ga_debug=1 을 붙여 접속하면 GA4 DebugView에 표시된다 (일반 방문자 데이터에는 영향 없음)
+    var gaDebug = /[?&]ga_debug=1\b/.test(location.search);
+    gtag('config', 'G-F86695PV7N', gaDebug ? { debug_mode: true } : {});
   </script>
 
   <style>
