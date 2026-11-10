@@ -1396,6 +1396,7 @@ window.addEventListener('hashchange', handleRoute);
 function showPage(name) {
   document.querySelectorAll('.page-view').forEach(v => v.classList.remove('is-active'));
   document.getElementById('page-' + name).classList.add('is-active');
+  if (name === 'home') trackBannerView(bannerIdx);   // 홈 진입 시 현재 슬라이드 노출
 }
 
 function goHome()      { navigate('/'); }
@@ -2338,7 +2339,41 @@ function goToBanner(idx) {
   document.getElementById('banner-track').style.transform = `translateX(-${bannerIdx * 100}%)`;
   document.querySelectorAll('.banner-dot').forEach((d, i) => d.classList.toggle('is-active', i === bannerIdx));
   resetBannerTimer();
+  trackBannerView(bannerIdx);
 }
+
+// [GA4 택소노미 #9] promotion_view — 상단 배너 슬라이드 노출
+// 홈 화면이 열려 있고 배너가 화면에 보일 때, 슬라이드당 페이지 로드 1회만 전송
+const bannerViewed = new Set();
+function trackBannerView(idx) {
+  if (bannerViewed.has(idx)) return;
+  const home = document.getElementById('page-home');
+  const hero = document.getElementById('hero');
+  if (!home || !hero || !home.classList.contains('is-active')) return;
+  const r = hero.getBoundingClientRect();
+  if (r.bottom <= 0 || r.top >= window.innerHeight) return;   // 화면 밖이면 노출로 보지 않음
+  const slide = document.getElementById('banner-' + (idx + 1));
+  if (!slide) return;
+  bannerViewed.add(idx);
+  trackEvent('promotion_view', {
+    promotion_name: slide.dataset.bannerTitle,
+    promotion_slot: 'top_banner',
+    banner_position: idx + 1
+  });
+}
+
+// [GA4 택소노미 #10] promotion_click — 상단 배너 CTA 버튼 클릭
+document.addEventListener('click', function (e) {
+  const cta = e.target.closest('.banner-cta');
+  if (!cta) return;
+  const slide = cta.closest('.banner-slide');
+  if (!slide) return;
+  trackEvent('promotion_click', {
+    promotion_name: slide.dataset.bannerTitle,
+    promotion_slot: 'top_banner',
+    banner_position: Number(slide.dataset.bannerId)
+  });
+});
 
 function moveBanner(dir) {
   goToBanner(bannerIdx + dir);
