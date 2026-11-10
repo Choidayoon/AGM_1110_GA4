@@ -2302,6 +2302,8 @@ function doSearch(event) {
   if (event) event.preventDefault();
   const query = document.getElementById('search-input').value.trim();
   if (!query) { navigate('/'); return; }
+  // [GA4 택소노미 #11] search — 상단 검색창에서 검색 제출 (새로고침/뒤로가기로 재렌더되는 경우는 제외)
+  trackEvent('search', { search_term: query, result_count: searchProducts(query).length });
   pendingScrollTo = 'section-all-products';
   navigate('/search/' + encodeURIComponent(query));
 }
